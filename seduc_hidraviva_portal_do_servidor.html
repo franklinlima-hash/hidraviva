@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>SEDUC HidraViva | Desafio do Servidor Hidratado</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter e Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for Web Audio Effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <!-- YouTube Iframe API script -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        seduc: {
+                            blue: '#003A70',
+                            lightBlue: '#0072CE',
+                            green: '#00875A',
+                            gold: '#FFC72C',
+                            bg: '#F4F7FA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Wave Animation for Water Glass */
+        .water-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1.5rem;
+        }
+        .water-wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, #3B82F6 0%, #1D4ED8 100%);
+            transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .water-wave::before {
+            content: "";
+            position: absolute;
+            width: 200%;
+            height: 20px;
+            top: -10px;
+            left: -50%;
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 40%;
+            animation: wave 4s infinite linear;
+        }
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+        }
+        /* Custom Scrollbar for YouTube playlist list */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #F1F5F9;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="bg-seduc-bg font-sans text-gray-800 min-h-screen flex flex-col justify-between selection:bg-seduc-lightBlue selection:text-white">
+
+    <!-- Header Principal -->
+    <header class="bg-seduc-blue text-white shadow-md border-b-4 border-seduc-gold sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-xl shadow-inner text-seduc-blue flex items-center justify-center font-bold text-xl h-10 w-10">
+                    <i class="fa-solid font-bold fa-glass-water text-seduc-lightBlue"></i>
+                </div>
+                <div>
+                    <h1 class="font-heading font-extrabold text-lg sm:text-xl tracking-tight leading-none text-white">
+                        SEDUC <span class="text-seduc-gold">HidraViva</span>
+                    </h1>
+                    <p class="text-xs text-blue-200">Qualidade de Vida do Servidor Público • SEDUC-MT</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3 text-xs sm:text-sm">
+                <div id="date-badge" class="bg-blue-900/60 px-3 py-1.5 rounded-full border border-blue-400/30 flex items-center gap-2">
+                    <i class="fa-regular fa-calendar-check text-seduc-gold"></i>
+                    <span id="current-date">--/--/----</span>
+                </div>
+                <button onclick="toggleAudio()" id="btn-audio-global" class="bg-red-700 hover:bg-red-800 text-white px-3 py-1.5 rounded-full text-xs font-semibold transition flex items-center gap-1.5 shadow">
+                    <i class="fa-brands fa-youtube" id="audio-icon"></i>
+                    <span id="audio-text">Músicas do YouTube</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+
+        <!-- Banner de Boas-Vindas do Analista de TI SEDUC -->
+        <div class="bg-gradient-to-r from-seduc-blue via-blue-900 to-indigo-900 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute right-0 top-0 bottom-0 opacity-10 pointer-events-none flex items-center pr-10">
+                <i class="fa-solid fa-cloud-sun-rain text-9xl"></i>
+            </div>
+            <div class="relative z-10 max-w-3xl">
+                <div class="inline-flex items-center gap-2 bg-blue-500/20 text-blue-200 text-xs px-3 py-1 rounded-full mb-3 border border-blue-400/30">
+                    <i class="fa-solid fa-laptop-code text-seduc-gold"></i> Módulo de TI & Gestão de Pessoas SEDUC-MT
+                </div>
+                <h2 class="font-heading text-2xl sm:text-3xl font-bold text-white mb-2">
+                    Olá, Servidor! Como está a sua hidratação hoje?
+                </h2>
+                <p class="text-blue-100 text-sm sm:text-base leading-relaxed">
+                    No clima mato-grossense, manter-se hidratado e fazer pausas ativas é essencial para a sua saúde e rendimento. Selecione seu município nas DREs ou Órgão Central e acompanhe sua meta com música no trabalho!
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- Left Column: Registration & MT Weather (4 cols) -->
+            <div class="lg:col-span-4 space-y-6">
+                <!-- Card de Registro do Servidor -->
+                <div class="glass-card rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h3 class="font-heading font-bold text-gray-800 text-lg mb-4 flex items-center gap-2 border-b pb-2">
+                        <i class="fa-solid fa-id-card text-seduc-lightBlue"></i> Cadastro do Servidor
+                    </h3>
+
+                    <form id="form-servidor" onsubmit="salvarPerfil(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Nome Completo</label>
+                            <input type="text" id="input-nome" required placeholder="Ex: Maria Silva"
+                                class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-seduc-lightBlue focus:border-seduc-lightBlue text-sm transition">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Setor / Superintendência</label>
+                                <select id="input-setor" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-seduc-lightBlue text-sm">
+                                    <option value="DTI - Tecnologia">DTI / TI</option>
+                                    <option value="SAG - Gestão">SAG - Gestão</option>
+                                    <option value="SAGE - Ensino">SAGE - Ensino</option>
+                                    <option value="SAOC - Orçamento">SAOC - Orçamento</option>
+                                    <option value="Gabinete SEDUC">Gabinete SEDUC</option>
+                                    <option value="DRE / Unidade Escolar">DRE / Unidade Escolar</option>
+                                    <option value="Outros Setores">Outros Setores</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Peso (kg)</label>
+                                <input type="number" id="input-peso" value="70" min="30" max="200" required
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-seduc-lightBlue text-sm">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Município de Lotação / Atuação em MT</label>
+                            <select id="select-cidade" onchange="atualizarClimaCidade()" class="w-full px-3.5 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-seduc-lightBlue text-sm font-medium">
+                                
+                                <!-- Órgão Central -->
+                                <optgroup label="🏢 Órgão Central — SEDUC/MT">
+                                    <option value="Cuiabá (Sede SEDUC/MT)" selected>Cuiabá (Sede / Órgão Central SEDUC-MT)</option>
+                                </optgroup>
+
+                                <!-- DME Metropolitana -->
+                                <optgroup label="🏛️ DME Metropolitana (11 municípios)">
+                                    <option value="Acorizal">Acorizal</option>
+                                    <option value="Barão de Melgaço">Barão de Melgaço</option>
+                                    <option value="Chapada dos Guimarães">Chapada dos Guimarães</option>
+                                    <option value="Cuiabá">Cuiabá</option>
+                                    <option value="Jangada">Jangada</option>
+                                    <option value="Nossa Senhora do Livramento">Nossa Senhora do Livramento</option>
+                                    <option value="Nova Brasilândia">Nova Brasilândia</option>
+                                    <option value="Planalto da Serra">Planalto da Serra</option>
+                                    <option value="Poconé">Poconé</option>
+                                    <option value="Santo Antônio de Leverger">Santo Antônio de Leverger</option>
+                                    <option value="Várzea Grande">Várzea Grande</option>
+                                </optgroup>
+
+                                <!-- DRE Alta Floresta -->
+                                <optgroup label="🌿 DRE Alta Floresta (7 municípios)">
+                                    <option value="Alta Floresta">Alta Floresta</option>
+                                    <option value="Apiacás">Apiacás</option>
+                                    <option value="Carlinda">Carlinda</option>
+                                    <option value="Nova Bandeirantes">Nova Bandeirantes</option>
+                                    <option value="Nova Canaã do Norte">Nova Canaã do Norte</option>
+                                    <option value="Nova Monte Verde">Nova Monte Verde</option>
+                                    <option value="Paranaíta">Paranaíta</option>
+                                </optgroup>
+
+                                <!-- DRE Barra do Garças -->
+                                <optgroup label="🌄 DRE Barra do Garças (16 municípios)">
+                                    <option value="Água Boa">Água Boa</option>
+                                    <option value="Araguaiana">Araguaiana</option>
+                                    <option value="Barra do Garças">Barra do Garças</option>
+                                    <option value="Campinápolis">Campinápolis</option>
+                                    <option value="Canarana">Canarana</option>
+                                    <option value="Cocalinho">Cocalinho</option>
+                                    <option value="General Carneiro">General Carneiro</option>
+                                    <option value="Nova Nazaré">Nova Nazaré</option>
+                                    <option value="Nova São Joaquim">Nova São Joaquim</option>
+                                    <option value="Nova Xavantina">Nova Xavantina</option>
+                                    <option value="Pontal do Araguaia">Pontal do Araguaia</option>
+                                    <option value="Ponte Branca">Ponte Branca</option>
+                                    <option value="Querência">Querência</option>
+                                    <option value="Ribeirão Cascalheira">Ribeirão Cascalheira</option>
+                                    <option value="Ribeirãozinho">Ribeirãozinho</option>
+                                    <option value="Torixoréu">Torixoréu</option>
+                                </optgroup>
+
+                                <!-- DRE Cáceres -->
+                                <optgroup label="🐊 DRE Cáceres (12 municípios)">
+                                    <option value="Araputanga">Araputanga</option>
+                                    <option value="Cáceres">Cáceres</option>
+                                    <option value="Curvelândia">Curvelândia</option>
+                                    <option value="Glória D'Oeste">Glória D'Oeste</option>
+                                    <option value="Indiavaí">Indiavaí</option>
+                                    <option value="Lambari D'Oeste">Lambari D'Oeste</option>
+                                    <option value="Mirassol D'Oeste">Mirassol D'Oeste</option>
+                                    <option value="Porto Esperidião">Porto Esperidião</option>
+                                    <option value="Reserva do Cabaçal">Reserva do Cabaçal</option>
+                                    <option value="Rio Branco">Rio Branco</option>
+                                    <option value="Salto do Céu">Salto do Céu</option>
+                                    <option value="São José dos Quatro Marcos">São José dos Quatro Marcos</option>
+                                </optgroup>
+
+                                <!-- DRE Confresa -->
+                                <optgroup label="🌳 DRE Confresa (13 municípios)">
+                                    <option value="Alto Boa Vista">Alto Boa Vista</option>
+                                    <option value="Bom Jesus do Araguaia">Bom Jesus do Araguaia</option>
+                                    <option value="Canabrava do Norte">Canabrava do Norte</option>
+                                    <option value="Confresa">Confresa</option>
+                                    <option value="Luciara">Luciara</option>
+                                    <option value="Novo Santo Antônio">Novo Santo Antônio</option>
+                                    <option value="Porto Alegre do Norte">Porto Alegre do Norte</option>
+                                    <option value="Santa Cruz do Xingu">Santa Cruz do Xingu</option>
+                                    <option value="Santa Terezinha">Santa Terezinha</option>
+                                    <option value="São Félix do Araguaia">São Félix do Araguaia</option>
+                                    <option value="São José do Xingu">São José do Xingu</option>
+                                    <option value="Serra Nova Dourada">Serra Nova Dourada</option>
+                                    <option value="Vila Rica">Vila Rica</option>
+                                </optgroup>
+
+                                <!-- DRE Diamantino -->
+                                <optgroup label="💎 DRE Diamantino (12 municípios)">
+                                    <option value="Alto Paraguai">Alto Paraguai</option>
+                                    <option value="Arenápolis">Arenápolis</option>
+                                    <option value="Diamantino">Diamantino</option>
+                                    <option value="Nobres">Nobres</option>
+                                    <option value="Nortelândia">Nortelândia</option>
+                                    <option value="Nova Maringá">Nova Maringá</option>
+                                    <option value="Nova Marilândia">Nova Marilândia</option>
+                                    <option value="Nova Mutum">Nova Mutum</option>
+                                    <option value="Rosário Oeste">Rosário Oeste</option>
+                                    <option value="Santa Rita do Trivelato">Santa Rita do Trivelato</option>
+                                    <option value="São José do Rio Claro">São José do Rio Claro</option>
+                                    <option value="Santo Afonso">Santo Afonso</option>
+                                </optgroup>
+
+                                <!-- DRE Juína -->
+                                <optgroup label="🌲 DRE Juína (10 municípios)">
+                                    <option value="Aripuanã">Aripuanã</option>
+                                    <option value="Brasnorte">Brasnorte</option>
+                                    <option value="Castanheira">Castanheira</option>
+                                    <option value="Colniza">Colniza</option>
+                                    <option value="Cotriguaçu">Cotriguaçu</option>
+                                    <option value="Juína">Juína</option>
+                                    <option value="Juruena">Juruena</option>
+                                    <option value="Juara">Juara</option>
+                                    <option value="Novo Horizonte do Norte">Novo Horizonte do Norte</option>
+                                    <option value="Porto dos Gaúchos">Porto dos Gaúchos</option>
+                                </optgroup>
+
+                                <!-- DRE Matupá -->
+                                <optgroup label="🌾 DRE Matupá (7 municípios)">
+                                    <option value="Guarantã do Norte">Guarantã do Norte</option>
+                                    <option value="Marcelândia">Marcelândia</option>
+                                    <option value="Matupá">Matupá</option>
+                                    <option value="Nova Guarita">Nova Guarita</option>
+                                    <option value="Novo Mundo">Novo Mundo</option>
+                                    <option value="Peixoto de Azevedo">Peixoto de Azevedo</option>
+                                    <option value="Terra Nova do Norte">Terra Nova do Norte</option>
+                                </optgroup>
+
+                                <!-- DRE Pontes e Lacerda -->
+                                <optgroup label="🛡️ DRE Pontes e Lacerda (10 municípios)">
+                                    <option value="Campos de Júlio">Campos de Júlio</option>
+                                    <option value="Comodoro">Comodoro</option>
+                                    <option value="Conquista D'Oeste">Conquista D'Oeste</option>
+                                    <option value="Figueirópolis D'Oeste">Figueirópolis D'Oeste</option>
+                                    <option value="Jauru">Jauru</option>
+                                    <option value="Nova Lacerda">Nova Lacerda</option>
+                                    <option value="Pontes e Lacerda">Pontes e Lacerda</option>
+                                    <option value="Rondolândia">Rondolândia</option>
+                                    <option value="Vale de São Domingos">Vale de São Domingos</option>
+                                    <option value="Vila Bela da Santíssima Trindade">Vila Bela da Santíssima Trindade</option>
+                                </optgroup>
+
+                                <!-- DRE Primavera do Leste -->
+                                <optgroup label="🌾 DRE Primavera do Leste (6 municípios)">
+                                    <option value="Campo Verde">Campo Verde</option>
+                                    <option value="Gaúcha do Norte">Gaúcha do Norte</option>
+                                    <option value="Paranatinga">Paranatinga</option>
+                                    <option value="Poxoréu">Poxoréu</option>
+                                    <option value="Primavera do Leste">Primavera do Leste</option>
+                                    <option value="Santo Antônio do Leste">Santo Antônio do Leste</option>
+                                </optgroup>
+
+                                <!-- DRE Rondonópolis -->
+                                <optgroup label="🚜 DRE Rondonópolis (14 municípios)">
+                                    <option value="Alto Araguaia">Alto Araguaia</option>
+                                    <option value="Alto Garças">Alto Garças</option>
+                                    <option value="Alto Taquari">Alto Taquari</option>
+                                    <option value="Araguainha">Araguainha</option>
+                                    <option value="Dom Aquino">Dom Aquino</option>
+                                    <option value="Guiratinga">Guiratinga</option>
+                                    <option value="Itiquira">Itiquira</option>
+                                    <option value="Jaciara">Jaciara</option>
+                                    <option value="Juscimeira">Juscimeira</option>
+                                    <option value="Pedra Preta">Pedra Preta</option>
+                                    <option value="Rondonópolis">Rondonópolis</option>
+                                    <option value="São José do Povo">São José do Povo</option>
+                                    <option value="São Pedro da Cipa">São Pedro da Cipa</option>
+                                    <option value="Tesouro">Tesouro</option>
+                                </optgroup>
+
+                                <!-- DRE Sinop -->
+                                <optgroup label="🌱 DRE Sinop (16 municípios)">
+                                    <option value="Cláudia">Cláudia</option>
+                                    <option value="Colíder">Colíder</option>
+                                    <option value="Feliz Natal">Feliz Natal</option>
+                                    <option value="Ipiranga do Norte">Ipiranga do Norte</option>
+                                    <option value="Itaúba">Itaúba</option>
+                                    <option value="Itanhangá">Itanhangá</option>
+                                    <option value="Lucas do Rio Verde">Lucas do Rio Verde</option>
+                                    <option value="Nova Santa Helena">Nova Santa Helena</option>
+                                    <option value="Nova Ubiratã">Nova Ubiratã</option>
+                                    <option value="Santa Carmem">Santa Carmem</option>
+                                    <option value="Sinop">Sinop</option>
+                                    <option value="Sorriso">Sorriso</option>
+                                    <option value="Tapurah">Tapurah</option>
+                                    <option value="União do Sul">União do Sul</option>
+                                    <option value="Tabaporã">Tabaporã</option>
+                                    <option value="Vera">Vera</option>
+                                </optgroup>
+
+                                <!-- DRE Tangará da Serra -->
+                                <optgroup label="🌻 DRE Tangará da Serra (7 municípios)">
+                                    <option value="Barra do Bugres">Barra do Bugres</option>
+                                    <option value="Campo Novo do Parecis">Campo Novo do Parecis</option>
+                                    <option value="Denise">Denise</option>
+                                    <option value="Nova Olímpia">Nova Olímpia</option>
+                                    <option value="Porto Estrela">Porto Estrela</option>
+                                    <option value="Sapezal">Sapezal</option>
+                                    <option value="Tangará da Serra">Tangará da Serra</option>
+                                </optgroup>
+
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full bg-seduc-lightBlue hover:bg-seduc-blue text-white font-semibold py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2 text-sm">
+                            <i class="fa-solid fa-floppy-disk"></i> Atualizar Minha Meta
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Card do Clima da Cidade em MT -->
+                <div class="bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+                    <div class="flex justify-between items-start mb-2">
+                        <div>
+                            <span class="text-xs bg-white/20 px-2.5 py-1 rounded-full font-medium uppercase tracking-wider">Clima Regional MT</span>
+                            <h4 id="clima-cidade" class="font-heading font-bold text-xl mt-1">Cuiabá</h4>
+                        </div>
+                        <div id="clima-icone" class="text-4xl text-yellow-200">
+                            <i class="fa-solid fa-sun animate-pulse"></i>
+                        </div>
+                    </div>
+
+                    <div class="flex items-baseline space-x-2 my-2">
+                        <span id="clima-temp" class="text-5xl font-black font-heading tracking-tight">38°</span>
+                        <span class="text-amber-100 font-medium text-sm">C (Sensação de até <span id="clima-sensacao">41°</span>C)</span>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-t border-white/20 text-xs text-amber-50 flex items-center justify-between">
+                        <span><i class="fa-solid fa-droplet text-blue-200"></i> Umidade: <strong id="clima-umidade">35%</strong></span>
+                        <span id="badge-alerta" class="bg-red-800/80 text-white font-bold px-2 py-0.5 rounded">Calor Intenso</span>
+                    </div>
+                </div>
+
+                <!-- Dica do Analista de TI -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200 flex items-start space-x-3">
+                    <div class="bg-blue-100 text-seduc-blue p-3 rounded-xl shrink-0">
+                        <i class="fa-solid fa-circle-info text-xl"></i>
+                    </div>
+                    <div class="text-xs text-gray-600 leading-relaxed">
+                        <strong class="text-gray-800 block text-sm mb-0.5">Dica da DTI/SEDUC:</strong>
+                        O clima em MT exige atenção contínua à hidratação. Beber água com regularidade evita fadiga mental no computador e previne problemas renais!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Middle Column: Water Tracker Game (5 cols) -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-card rounded-2xl p-6 shadow-lg border border-gray-100 flex flex-col justify-between min-h-[480px]">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h3 class="font-heading font-bold text-gray-800 text-lg">Meu Contador de Água</h3>
+                            <p class="text-xs text-gray-500">Meta calculada para seu peso e temperatura da região</p>
+                        </div>
+                        <span id="servidor-badge-nome" class="bg-blue-50 text-seduc-blue text-xs font-semibold px-3 py-1 rounded-full border border-blue-200">
+                            Servidor Ativo
+                        </span>
+                    </div>
+
+                    <!-- Water Visual Gauge Container -->
+                    <div class="my-4 flex flex-col items-center justify-center">
+                        <div class="w-48 h-64 water-container bg-slate-100 border-4 border-blue-300 shadow-inner flex flex-col justify-between items-center relative">
+                            <!-- Water liquid fill -->
+                            <div id="water-fill" class="water-wave" style="height: 0%;"></div>
+
+                            <!-- Measurement Markings -->
+                            <div class="absolute right-2 top-0 bottom-0 flex flex-col justify-between py-4 text-[10px] font-bold text-gray-400 select-none z-10">
+                                <span>100%</span>
+                                <span>75%</span>
+                                <span>50%</span>
+                                <span>25%</span>
+                                <span>0%</span>
+                            </div>
+
+                            <!-- Centered Status Label inside glass -->
+                            <div class="z-20 my-auto text-center px-3 py-1.5 bg-white/85 rounded-xl backdrop-blur-sm shadow-sm border border-white/60">
+                                <span id="percent-text" class="text-3xl font-black font-heading text-seduc-blue">0%</span>
+                                <p class="text-[11px] font-bold text-gray-600 uppercase tracking-wider">Atingido</p>
+                            </div>
+                        </div>
+
+                        <!-- Quantidade tomadas e total -->
+                        <div class="mt-4 text-center">
+                            <div class="text-2xl font-extrabold text-gray-800">
+                                <span id="copos-tomados" class="text-seduc-lightBlue text-3xl">0</span> / <span id="copos-meta">10</span> <span class="text-sm font-normal text-gray-500">copos (200ml)</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-0.5">
+                                Total tomado: <strong id="ml-tomados" class="text-seduc-blue">0 ml</strong> de <span id="ml-meta">2000 ml</span> recomendados
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="space-y-3 pt-2">
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="adicionarCopo(1)" class="bg-gradient-to-r from-blue-500 to-seduc-lightBlue hover:from-blue-600 hover:to-seduc-blue text-white font-bold py-2.5 px-2 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-plus"></i> +1 Copo (200ml)
+                            </button>
+
+                            <button onclick="adicionarGarrafa()" class="bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-600 hover:to-emerald-700 text-white font-bold py-2.5 px-2 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-bottle-water"></i> +1 Garrafa (500ml)
+                            </button>
+
+                            <button onclick="adicionarCafe()" class="bg-gradient-to-r from-amber-600 to-amber-800 hover:from-amber-700 hover:to-amber-900 text-white font-bold py-2.5 px-2 rounded-xl shadow-md transition transform active:scale-95 flex items-center justify-center gap-1.5 text-xs">
+                                <i class="fa-solid fa-mug-hot"></i> +1 Café (☕)
+                            </button>
+                        </div>
+
+                        <!-- Indicador de Compensação por Café -->
+                        <div id="info-cafe" class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-xs text-amber-900 flex items-center justify-between">
+                            <span class="flex items-center gap-1.5">
+                                <i class="fa-solid fa-mug-hot text-amber-700"></i>
+                                Cafés consumidos: <strong id="qtd-cafe">0</strong> xícaras
+                            </span>
+                            <span class="text-[11px] bg-amber-200/80 text-amber-900 font-semibold px-2 py-0.5 rounded-full">
+                                +<span id="ml-extra-cafe">0</span>ml de água extra
+                            </span>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs text-gray-500 px-1 pt-1">
+                            <button onclick="removerCopo()" class="text-red-500 hover:text-red-700 font-medium underline flex items-center gap-1">
+                                <i class="fa-solid fa-minus"></i> Desfazer último
+                            </button>
+                            <button onclick="resetarContador()" class="text-gray-400 hover:text-gray-600 flex items-center gap-1">
+                                <i class="fa-solid fa-rotate-left"></i> Reiniciar dia
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conquistas do Servidor -->
+                <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-200">
+                    <h4 class="font-heading font-bold text-gray-800 text-sm mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-award text-amber-500"></i> Medalhas de Hidratação
+                    </h4>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div id="badge-1" class="p-2.5 rounded-xl border bg-gray-50 opacity-40 transition">
+                            <i class="fa-solid fa-seedling text-2xl text-green-500 mb-1"></i>
+                            <p class="text-[10px] font-bold text-gray-700">Primeiro Gole</p>
+                        </div>
+                        <div id="badge-2" class="p-2.5 rounded-xl border bg-gray-50 opacity-40 transition">
+                            <i class="fa-solid fa-fire text-2xl text-orange-500 mb-1"></i>
+                            <p class="text-[10px] font-bold text-gray-700">Calor MT 35°C+</p>
+                        </div>
+                        <div id="badge-3" class="p-2.5 rounded-xl border bg-gray-50 opacity-40 transition">
+                            <i class="fa-solid fa-trophy text-2xl text-amber-400 mb-1"></i>
+                            <p class="text-[10px] font-bold text-gray-700">Meta 100%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Pause Activity & YouTube Player (3 cols) -->
+            <div class="lg:col-span-3 space-y-6">
+
+                <!-- Pausa Ativa no Trabalho -->
+                <div class="glass-card rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h3 class="font-heading font-bold text-gray-800 text-lg mb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-person-walking-arrow-loop-left text-seduc-green"></i> Pausa Ativa
+                    </h3>
+                    <p class="text-xs text-gray-500 mb-4">Exercícios rápidos para a rotina no escritório ou escola</p>
+
+                    <!-- Card de Atividade Sorteada -->
+                    <div id="card-atividade" class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-center mb-4">
+                        <div class="w-12 h-12 bg-seduc-green text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xl shadow">
+                            <i id="atividade-icon" class="fa-solid fa-spa"></i>
+                        </div>
+                        <h4 id="atividade-titulo" class="font-heading font-bold text-emerald-900 text-sm">Alongamento de Pescoço</h4>
+                        <p id="atividade-desc" class="text-xs text-emerald-700 mt-1">Incline a cabeça suavemente para cada lado mantendo 15 segundos.</p>
+                        <span id="atividade-tempo" class="inline-block mt-2 bg-emerald-200 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded-full">Duração: 2 minutos</span>
+                    </div>
+
+                    <button onclick="sortearAtividade()" class="w-full bg-seduc-green hover:bg-emerald-700 text-white font-semibold py-2 rounded-xl text-xs transition shadow flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-shuffle"></i> Nova Sugestão de Pausa
+                    </button>
+                </div>
+
+                <!-- Player de Música do YouTube e Foco -->
+                <div class="glass-card rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-heading font-bold text-gray-800 text-lg flex items-center gap-2">
+                            <i class="fa-brands fa-youtube text-red-600 text-xl"></i> Música & Foco
+                        </h3>
+                        <span id="yt-status-tag" class="bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            YouTube Player
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-500 mb-3">Escolha seu gênero musical preferido no YouTube para o trabalho</p>
+
+                    <!-- Embedded YouTube Player Container with Error Overlay -->
+                    <div class="relative w-full rounded-xl overflow-hidden shadow-md bg-black aspect-video mb-3 border border-gray-200 group">
+                        <iframe id="yt-player-iframe"
+                            class="w-full h-full"
+                            src="https://www.youtube.com/embed/jfKfPfyJRdk?enablejsapi=1&rel=0&modestbranding=1" 
+                            title="Música de Foco SEDUC" 
+                            frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                        </iframe>
+
+                        <!-- Error Overlay -->
+                        <div id="yt-error-overlay" class="hidden absolute inset-0 bg-slate-900/95 text-white p-4 flex-col justify-center items-center text-center z-20 backdrop-blur-sm">
+                            <i class="fa-brands fa-youtube text-red-500 text-4xl mb-2 animate-bounce"></i>
+                            <h4 class="font-bold text-sm text-white mb-1">Restrição de Reprodução Iframe</h4>
+                            <p class="text-[11px] text-gray-300 max-w-xs mb-3">
+                                Este vídeo não permite reprodução incorporada ou está restrito pelas políticas da rede.
+                            </p>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <a id="yt-overlay-direct-btn" href="https://www.youtube.com/watch?v=jfKfPfyJRdk" target="_blank" rel="noopener noreferrer"
+                                   class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-up-right-from-square"></i> Abrir Direto no YouTube
+                                </a>
+                                <button onclick="alternarGeradorAmbiental()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-cloud-rain"></i> Usar Som de Foco Interno
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Indicador da Faixa Atual -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-2.5 mb-3 flex items-center justify-between text-xs">
+                        <div class="truncate mr-2">
+                            <span class="text-[10px] text-gray-400 block uppercase font-semibold">Tocando Agora</span>
+                            <span id="yt-current-title" class="font-bold text-gray-800 truncate block">Lofi Hip Hop Radio 📚 Beats para Estudar</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="copiarLinkMusica()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 text-[11px] px-2 py-1 rounded-lg font-medium flex items-center gap-1 transition" title="Copiar link da música">
+                                <i class="fa-solid fa-copy"></i>
+                            </button>
+                            <a id="yt-external-link" href="https://www.youtube.com/watch?v=jfKfPfyJRdk" target="_blank" rel="noopener noreferrer" 
+                               class="bg-red-600 hover:bg-red-700 text-white text-[11px] px-2.5 py-1 rounded-lg font-medium flex items-center gap-1 transition">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i> Abrir
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Abas de Seleção: YouTube vs Som Ambiental -->
+                    <div class="flex border-b border-gray-200 mb-3 text-xs font-semibold">
+                        <button id="tab-yt" onclick="alternarAbaAudio('yt')" class="py-1.5 px-3 border-b-2 border-red-600 text-red-600 font-bold flex items-center gap-1.5">
+                            <i class="fa-brands fa-youtube"></i> Estilos Musicais (12)
+                        </button>
+                        <button id="tab-ambient" onclick="alternarAbaAudio('ambient')" class="py-1.5 px-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-cloud-rain"></i> Sons Ambientais
+                        </button>
+                    </div>
+
+                    <!-- Painel 1: Lista de Gêneros Musicais -->
+                    <div id="panel-yt-list" class="space-y-2 max-h-72 overflow-y-auto pr-1 text-xs custom-scrollbar">
+                        
+                        <!-- Lista de Estilos -->
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-amber-500 hover:bg-amber-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('F7e7-IDADfo', 'Samba & Bossa Nova Instrumental - Brasil Chill')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-drum"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Samba</p>
+                                    <p class="text-[10px] text-gray-500">Samba de Raiz & Choro Instrumental</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('F7e7-IDADfo', 'Samba & Bossa Nova Instrumental - Brasil Chill')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=F7e7-IDADfo" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-yellow-500 hover:bg-yellow-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('Y1Bu8qVabv0', 'Música Sertaneja & Viola Caipira Instrumental')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-yellow-100 text-yellow-800 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-hat-cowboy"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Sertanejo</p>
+                                    <p class="text-[10px] text-gray-500">Acústico Sertanejo & Modão Caipira</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('Y1Bu8qVabv0', 'Música Sertaneja & Viola Caipira Instrumental')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=Y1Bu8qVabv0" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('wR__3bqwsRQ', 'MPB Voz e Violão & Bossa Nova Instrumental')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-guitar"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">MPB (Música Popular Brasileira)</p>
+                                    <p class="text-[10px] text-gray-500">Clássicos da MPB, voz, violão e leveza</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('wR__3bqwsRQ', 'MPB Voz e Violão & Bossa Nova Instrumental')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=wR__3bqwsRQ" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-orange-500 hover:bg-orange-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('Tle_y7DyZV8', 'Forró Pé de Serra & Sanfona Instrumental')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-orange-100 text-orange-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-sun"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Forró</p>
+                                    <p class="text-[10px] text-gray-500">Forró Pé de Serra & Solos de Sanfona</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('Tle_y7DyZV8', 'Forró Pé de Serra & Sanfona Instrumental')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=Tle_y7DyZV8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-pink-500 hover:bg-pink-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('UyjDB_YXgIk', 'Funk Lofi Beats & Neo Soul Sessions')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-sliders"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Funk Carioca</p>
+                                    <p class="text-[10px] text-gray-500">Funk Lofi Beats & Ritmos Chill para Foco</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('UyjDB_YXgIk', 'Funk Lofi Beats & Neo Soul Sessions')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=UyjDB_YXgIk" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-stone-500 hover:bg-stone-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('EAfXhGHUw6E', 'Rock Nacional e Internacional Acústico e Instrumental')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-stone-200 text-stone-800 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-compact-disc"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Rock Nacional e Internacional</p>
+                                    <p class="text-[10px] text-gray-500">Versões acústicas e instrumentais do Rock</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('EAfXhGHUw6E', 'Rock Nacional e Internacional Acústico e Instrumental')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=EAfXhGHUw6E" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-purple-500 hover:bg-purple-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('6aSjeSUwh6o', 'Pop Popular Hits - Piano & Acoustic Covers')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-record-vinyl"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Pop</p>
+                                    <p class="text-[10px] text-gray-500">Sucessos Pop em versão Piano e Acústico</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('6aSjeSUwh6o', 'Pop Popular Hits - Piano & Acoustic Covers')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=6aSjeSUwh6o" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-cyan-500 hover:bg-cyan-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('MYPVQccHhAQ', 'Smooth Jazz & Cozy Coffee Shop Ambience')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-saxophone"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Jazz</p>
+                                    <p class="text-[10px] text-gray-500">Smooth Jazz, Saxofone & Piano Suave</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('MYPVQccHhAQ', 'Smooth Jazz & Cozy Coffee Shop Ambience')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=MYPVQccHhAQ" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('D6tFlbkCv-8', 'Relaxing Blues Guitar & Neo Soul Sessions')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-radio"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Blues</p>
+                                    <p class="text-[10px] text-gray-500">Guitarras lentas e Soul Blues para relaxar</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('D6tFlbkCv-8', 'Relaxing Blues Guitar & Neo Soul Sessions')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=D6tFlbkCv-8" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-violet-500 hover:bg-violet-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('4xDzrJKXOOY', 'Synthwave & Deep House Electronic Focus')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-violet-100 text-violet-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-bolt"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Eletrônica</p>
+                                    <p class="text-[10px] text-gray-500">Synthwave, Chillwave e Deep House</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('4xDzrJKXOOY', 'Synthwave & Deep House Electronic Focus')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=4xDzrJKXOOY" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-teal-500 hover:bg-teal-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('DyZh4H2xUtA', 'Bossa Nova Instrumentals & Brazilian Cafe Vibes')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-teal-100 text-teal-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-umbrella-beach"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Bossa Nova</p>
+                                    <p class="text-[10px] text-gray-500">Tom Jobim, João Gilberto & Clássicos</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('DyZh4H2xUtA', 'Bossa Nova Instrumentals & Brazilian Cafe Vibes')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=DyZh4H2xUtA" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="p-2 text-left rounded-xl border border-gray-200 hover:border-rose-500 hover:bg-rose-50/50 transition flex items-center justify-between gap-2 group">
+                            <div onclick="carregarMusicaYouTube('Id2mbxCnxtE', 'Indie Folk & Acoustic Chill Compilation')" class="flex items-center gap-2 cursor-pointer flex-grow truncate">
+                                <div class="w-7 h-7 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                                    <i class="fa-solid fa-leaf"></i>
+                                </div>
+                                <div class="truncate">
+                                    <p class="font-bold text-gray-800 truncate">Indie</p>
+                                    <p class="text-[10px] text-gray-500">Indie Folk, Acústicos e Músicas Alternativas</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button onclick="carregarMusicaYouTube('Id2mbxCnxtE', 'Indie Folk & Acoustic Chill Compilation')" class="text-red-500 hover:bg-red-100 p-1.5 rounded-lg transition" title="Tocar no Player">
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                                <a href="https://www.youtube.com/watch?v=Id2mbxCnxtE" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-red-600 hover:bg-red-100 p-1.5 rounded-lg transition" title="Abrir no YouTube">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Painel 2: Gerador de Sons Ambientais Internos -->
+                    <div id="panel-ambient-list" class="hidden space-y-2 max-h-48 overflow-y-auto pr-1 text-xs custom-scrollbar">
+                        <div class="bg-blue-50 border border-blue-200 p-2.5 rounded-xl mb-2 text-[11px] text-blue-900 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved text-blue-600 text-sm shrink-0"></i>
+                            <span>Sons sintetizados em tempo real via navegador. Imunes a bloqueios de rede!</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="tocarSomAmbiente('chuva')" class="p-2.5 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-left transition flex items-center gap-2">
+                                <i class="fa-solid fa-cloud-rain text-blue-500 text-lg"></i>
+                                <div>
+                                    <p class="font-bold text-gray-800 text-xs">Chuva Suave</p>
+                                    <p class="text-[10px] text-gray-500">Ruído relaxante</p>
+                                </div>
+                            </button>
+                            <button onclick="tocarSomAmbiente('ondas')" class="p-2.5 rounded-xl border border-gray-200 hover:border-teal-400 hover:bg-teal-50 text-left transition flex items-center gap-2">
+                                <i class="fa-solid fa-water text-teal-500 text-lg"></i>
+                                <div>
+                                    <p class="font-bold text-gray-800 text-xs">Ondas do Mar</p>
+                                    <p class="text-[10px] text-gray-500">Ritmo calmo</p>
+                                </div>
+                            </button>
+                            <button onclick="tocarSomAmbiente('lofi')" class="p-2.5 rounded-xl border border-gray-200 hover:border-purple-400 hover:bg-purple-50 text-left transition flex items-center gap-2">
+                                <i class="fa-solid fa-music text-purple-500 text-lg"></i>
+                                <div>
+                                    <p class="font-bold text-gray-800 text-xs">Tom de Foco</p>
+                                    <p class="text-[10px] text-gray-500">Onda Senoidal 432Hz</p>
+                                </div>
+                            </button>
+                            <button onclick="pararSomAmbiente()" class="p-2.5 rounded-xl border border-red-200 hover:bg-red-50 text-left transition flex items-center gap-2 text-red-600">
+                                <i class="fa-solid fa-volume-xmark text-lg"></i>
+                                <div>
+                                    <p class="font-bold text-xs">Parar Áudio</p>
+                                    <p class="text-[10px] text-red-500">Silenciar ruído</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Input para Inserir Link do YouTube -->
+                    <div class="mt-3 flex gap-1.5">
+                        <input type="text" id="input-yt-url" placeholder="Cole link ou ID do YouTube..." 
+                            class="w-full px-2.5 py-1.5 text-xs rounded-xl border border-gray-300 focus:ring-2 focus:ring-red-500 focus:outline-none">
+                        <button onclick="carregarUrlPersonalizada()" class="bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1.5 rounded-xl font-semibold transition shrink-0 flex items-center gap-1">
+                            <i class="fa-solid fa-play"></i> Tocar
+                        </button>
+                    </div>
+
+                    <p class="text-[10px] text-gray-400 text-center mt-3 flex items-center justify-center gap-1">
+                        <i class="fa-brands fa-youtube text-red-500"></i> Escolha entre 12 gêneros musicais para acompanhar seu trabalho
+                    </p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Footer Section: Mural de Participação dos Servidores SEDUC -->
+        <div class="bg-white rounded-2xl p-6 shadow-md border border-gray-200">
+            <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                <div>
+                    <h3 class="font-heading font-bold text-gray-800 text-lg flex items-center gap-2">
+                        <i class="fa-solid fa-users font-bold text-seduc-blue"></i> Mural de Hidratação SEDUC-MT
+                    </h3>
+                    <p class="text-xs text-gray-500">Acompanhe e inspire seus colegas de equipe nas DREs e Órgão Central da SEDUC!</p>
+                </div>
+                <button onclick="limparMural()" class="text-xs text-gray-400 hover:text-red-500 underline">
+                    Limpar histórico
+                </button>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-gray-600">
+                    <thead class="bg-gray-50 text-gray-700 font-bold uppercase tracking-wider text-[10px] border-b">
+                        <tr>
+                            <th class="py-2.5 px-4">Servidor</th>
+                            <th class="py-2.5 px-4">Setor</th>
+                            <th class="py-2.5 px-4">Município / DRE</th>
+                            <th class="py-2.5 px-4 text-center">Copos Tomados</th>
+                            <th class="py-2.5 px-4 text-center">Progresso</th>
+                            <th class="py-2.5 px-4 text-right">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mural-lista" class="divide-y divide-gray-100">
+                        <!-- Dynamic items loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-seduc-blue text-white text-center py-4 border-t border-seduc-gold text-xs">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p>© 2026 SEDUC-MT - Secretaria de Estado de Educação de Mato Grosso</p>
+            <p class="text-blue-200">Desenvolvido para a Saúde e Qualidade de Vida do Servidor Público</p>
+        </div>
+    </footer>
+
+    <!-- Custom Modal Toast Message Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // Mapeamento Regional Oficial das DREs e Municípios de MT
+        const mapaDREs = {
+            "Cuiabá (Sede SEDUC/MT)": { dre: "Órgão Central SEDUC-MT", temp: 40, sensacao: 43, umidade: 28, alerta: "Calor Extremo", icone: "fa-sun" },
+            
+            // DME Metropolitana (11 municípios)
+            "Acorizal": { dre: "DME Metropolitana", temp: 39, sensacao: 42, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Barão de Melgaço": { dre: "DME Metropolitana", temp: 40, sensacao: 43, umidade: 29, alerta: "Calor Extremo", icone: "fa-sun" },
+            "Chapada dos Guimarães": { dre: "DME Metropolitana", temp: 32, sensacao: 34, umidade: 45, alerta: "Clima Ameno / Serra", icone: "fa-cloud-sun" },
+            "Cuiabá": { dre: "DME Metropolitana", temp: 40, sensacao: 43, umidade: 28, alerta: "Calor Extremo", icone: "fa-sun" },
+            "Jangada": { dre: "DME Metropolitana", temp: 39, sensacao: 41, umidade: 31, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Nossa Senhora do Livramento": { dre: "DME Metropolitana", temp: 39, sensacao: 42, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Nova Brasilândia": { dre: "DME Metropolitana", temp: 35, sensacao: 37, umidade: 38, alerta: "Moderado / Quente", icone: "fa-cloud-sun" },
+            "Planalto da Serra": { dre: "DME Metropolitana", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Poconé": { dre: "DME Metropolitana", temp: 41, sensacao: 44, umidade: 26, alerta: "Pantanal / Calor", icone: "fa-fire" },
+            "Santo Antônio de Leverger": { dre: "DME Metropolitana", temp: 40, sensacao: 43, umidade: 28, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Várzea Grande": { dre: "DME Metropolitana", temp: 39, sensacao: 42, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+
+            // DRE Alta Floresta (7 municípios)
+            "Alta Floresta": { dre: "DRE Alta Floresta", temp: 35, sensacao: 37, umidade: 48, alerta: "Norte Matogrossense", icone: "fa-cloud-sun" },
+            "Apiacás": { dre: "DRE Alta Floresta", temp: 34, sensacao: 36, umidade: 52, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Carlinda": { dre: "DRE Alta Floresta", temp: 35, sensacao: 37, umidade: 49, alerta: "Quente", icone: "fa-sun" },
+            "Nova Bandeirantes": { dre: "DRE Alta Floresta", temp: 34, sensacao: 36, umidade: 50, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Nova Canaã do Norte": { dre: "DRE Alta Floresta", temp: 35, sensacao: 37, umidade: 47, alerta: "Quente", icone: "fa-sun" },
+            "Nova Monte Verde": { dre: "DRE Alta Floresta", temp: 34, sensacao: 36, umidade: 51, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Paranaíta": { dre: "DRE Alta Floresta", temp: 35, sensacao: 37, umidade: 48, alerta: "Norte Umido", icone: "fa-cloud-sun" },
+
+            // DRE Barra do Garças (16 municípios)
+            "Água Boa": { dre: "DRE Barra do Garças", temp: 38, sensacao: 41, umidade: 31, alerta: "Araguaia Seco", icone: "fa-sun" },
+            "Araguaiana": { dre: "DRE Barra do Garças", temp: 39, sensacao: 42, umidade: 29, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Barra do Garças": { dre: "DRE Barra do Garças", temp: 39, sensacao: 42, umidade: 29, alerta: "Calor Intenso / Araguaia", icone: "fa-sun" },
+            "Campinápolis": { dre: "DRE Barra do Garças", temp: 37, sensacao: 39, umidade: 33, alerta: "Quente / Seco", icone: "fa-sun" },
+            "Canarana": { dre: "DRE Barra do Garças", temp: 37, sensacao: 39, umidade: 34, alerta: "Quente / Seco", icone: "fa-sun" },
+            "Cocalinho": { dre: "DRE Barra do Garças", temp: 39, sensacao: 42, umidade: 28, alerta: "Calor Intenso", icone: "fa-sun" },
+            "General Carneiro": { dre: "DRE Barra do Garças", temp: 38, sensacao: 40, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Nova Nazaré": { dre: "DRE Barra do Garças", temp: 37, sensacao: 39, umidade: 32, alerta: "Quente", icone: "fa-sun" },
+            "Nova São Joaquim": { dre: "DRE Barra do Garças", temp: 37, sensacao: 39, umidade: 33, alerta: "Quente", icone: "fa-sun" },
+            "Nova Xavantina": { dre: "DRE Barra do Garças", temp: 38, sensacao: 41, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Pontal do Araguaia": { dre: "DRE Barra do Garças", temp: 39, sensacao: 42, umidade: 29, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Ponte Branca": { dre: "DRE Barra do Garças", temp: 37, sensacao: 39, umidade: 32, alerta: "Quente", icone: "fa-sun" },
+            "Querência": { dre: "DRE Barra do Garças", temp: 36, sensacao: 38, umidade: 37, alerta: "Moderado / Quente", icone: "fa-sun" },
+            "Ribeirão Cascalheira": { dre: "DRE Barra do Garças", temp: 38, sensacao: 40, umidade: 31, alerta: "Quente / Araguaia", icone: "fa-sun" },
+            "Ribeirãozinho": { dre: "DRE Barra do Garças", temp: 37, sensacao: 39, umidade: 33, alerta: "Quente", icone: "fa-sun" },
+            "Torixoréu": { dre: "DRE Barra do Garças", temp: 38, sensacao: 40, umidade: 31, alerta: "Calor Intenso", icone: "fa-sun" },
+
+            // DRE Cáceres (12 municípios)
+            "Araputanga": { dre: "DRE Cáceres", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente / Fronteira", icone: "fa-sun" },
+            "Cáceres": { dre: "DRE Cáceres", temp: 38, sensacao: 41, umidade: 32, alerta: "Calor Pantaneiro", icone: "fa-sun" },
+            "Curvelândia": { dre: "DRE Cáceres", temp: 37, sensacao: 39, umidade: 34, alerta: "Quente", icone: "fa-sun" },
+            "Glória D'Oeste": { dre: "DRE Cáceres", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Indiavaí": { dre: "DRE Cáceres", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Lambari D'Oeste": { dre: "DRE Cáceres", temp: 36, sensacao: 38, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Mirassol D'Oeste": { dre: "DRE Cáceres", temp: 37, sensacao: 39, umidade: 34, alerta: "Quente", icone: "fa-sun" },
+            "Porto Esperidião": { dre: "DRE Cáceres", temp: 38, sensacao: 40, umidade: 33, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Reserva do Cabaçal": { dre: "DRE Cáceres", temp: 35, sensacao: 37, umidade: 38, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Rio Branco": { dre: "DRE Cáceres", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Salto do Céu": { dre: "DRE Cáceres", temp: 35, sensacao: 37, umidade: 38, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "São José dos Quatro Marcos": { dre: "DRE Cáceres", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+
+            // DRE Confresa (13 municípios)
+            "Alto Boa Vista": { dre: "DRE Confresa", temp: 37, sensacao: 39, umidade: 34, alerta: "Norte Araguaia", icone: "fa-sun" },
+            "Bom Jesus do Araguaia": { dre: "DRE Confresa", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Canabrava do Norte": { dre: "DRE Confresa", temp: 37, sensacao: 39, umidade: 34, alerta: "Quente", icone: "fa-sun" },
+            "Confresa": { dre: "DRE Confresa", temp: 38, sensacao: 40, umidade: 33, alerta: "Norte Araguaia Seco", icone: "fa-sun" },
+            "Luciara": { dre: "DRE Confresa", temp: 38, sensacao: 41, umidade: 32, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Novo Santo Antônio": { dre: "DRE Confresa", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Porto Alegre do Norte": { dre: "DRE Confresa", temp: 38, sensacao: 40, umidade: 33, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Santa Cruz do Xingu": { dre: "DRE Confresa", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Santa Terezinha": { dre: "DRE Confresa", temp: 38, sensacao: 41, umidade: 31, alerta: "Calor Intenso", icone: "fa-sun" },
+            "São Félix do Araguaia": { dre: "DRE Confresa", temp: 38, sensacao: 41, umidade: 32, alerta: "Calor Intenso / Araguaia", icone: "fa-sun" },
+            "São José do Xingu": { dre: "DRE Confresa", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Serra Nova Dourada": { dre: "DRE Confresa", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Vila Rica": { dre: "DRE Confresa", temp: 38, sensacao: 40, umidade: 32, alerta: "Extremo Norte Araguaia", icone: "fa-sun" },
+
+            // DRE Diamantino (12 municípios)
+            "Alto Paraguai": { dre: "DRE Diamantino", temp: 38, sensacao: 40, umidade: 32, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Arenápolis": { dre: "DRE Diamantino", temp: 38, sensacao: 40, umidade: 32, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Diamantino": { dre: "DRE Diamantino", temp: 37, sensacao: 39, umidade: 34, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Nobres": { dre: "DRE Diamantino", temp: 38, sensacao: 41, umidade: 31, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Nortelândia": { dre: "DRE Diamantino", temp: 38, sensacao: 40, umidade: 32, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Nova Maringá": { dre: "DRE Diamantino", temp: 36, sensacao: 38, umidade: 38, alerta: "Moderado / Quente", icone: "fa-cloud-sun" },
+            "Nova Marilândia": { dre: "DRE Diamantino", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Nova Mutum": { dre: "DRE Diamantino", temp: 35, sensacao: 37, umidade: 42, alerta: "Agronegócio / Quente", icone: "fa-cloud-sun" },
+            "Rosário Oeste": { dre: "DRE Diamantino", temp: 39, sensacao: 42, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Santa Rita do Trivelato": { dre: "DRE Diamantino", temp: 35, sensacao: 37, umidade: 41, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "São José do Rio Claro": { dre: "DRE Diamantino", temp: 36, sensacao: 38, umidade: 38, alerta: "Quente", icone: "fa-sun" },
+            "Santo Afonso": { dre: "DRE Diamantino", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+
+            // DRE Juína (10 municípios)
+            "Aripuanã": { dre: "DRE Juína", temp: 33, sensacao: 35, umidade: 55, alerta: "Noroeste Florestal", icone: "fa-cloud-sun" },
+            "Brasnorte": { dre: "DRE Juína", temp: 35, sensacao: 37, umidade: 45, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Castanheira": { dre: "DRE Juína", temp: 34, sensacao: 36, umidade: 50, alerta: "Ameno / Úmido", icone: "fa-cloud-sun" },
+            "Colniza": { dre: "DRE Juína", temp: 33, sensacao: 35, umidade: 56, alerta: "Extremo Noroeste", icone: "fa-cloud-sun" },
+            "Cotriguaçu": { dre: "DRE Juína", temp: 33, sensacao: 35, umidade: 54, alerta: "Ameno / Floresta", icone: "fa-cloud-sun" },
+            "Juína": { dre: "DRE Juína", temp: 33, sensacao: 35, umidade: 52, alerta: "Noroeste MT", icone: "fa-cloud-sun" },
+            "Juruena": { dre: "DRE Juína", temp: 33, sensacao: 35, umidade: 55, alerta: "Úmido / Moderado", icone: "fa-cloud-sun" },
+            "Juara": { dre: "DRE Juína", temp: 35, sensacao: 37, umidade: 46, alerta: "Vale do Arinos", icone: "fa-cloud-sun" },
+            "Novo Horizonte do Norte": { dre: "DRE Juína", temp: 35, sensacao: 37, umidade: 47, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Porto dos Gaúchos": { dre: "DRE Juína", temp: 35, sensacao: 37, umidade: 48, alerta: "Moderado", icone: "fa-cloud-sun" },
+
+            // DRE Matupá (7 municípios)
+            "Guarantã do Norte": { dre: "DRE Matupá", temp: 35, sensacao: 37, umidade: 46, alerta: "Extremo Norte BR-163", icone: "fa-cloud-sun" },
+            "Marcelândia": { dre: "DRE Matupá", temp: 35, sensacao: 37, umidade: 48, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Matupá": { dre: "DRE Matupá", temp: 35, sensacao: 37, umidade: 47, alerta: "Norte MT", icone: "fa-cloud-sun" },
+            "Nova Guarita": { dre: "DRE Matupá", temp: 35, sensacao: 37, umidade: 48, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Novo Mundo": { dre: "DRE Matupá", temp: 35, sensacao: 37, umidade: 47, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Peixoto de Azevedo": { dre: "DRE Matupá", temp: 36, sensacao: 38, umidade: 45, alerta: "Quente / Norte", icone: "fa-sun" },
+            "Terra Nova do Norte": { dre: "DRE Matupá", temp: 35, sensacao: 37, umidade: 47, alerta: "Moderado", icone: "fa-cloud-sun" },
+
+            // DRE Pontes e Lacerda (10 municípios)
+            "Campos de Júlio": { dre: "DRE Pontes e Lacerda", temp: 33, sensacao: 35, umidade: 48, alerta: "Chapadão / Ameno", icone: "fa-cloud-sun" },
+            "Comodoro": { dre: "DRE Pontes e Lacerda", temp: 34, sensacao: 36, umidade: 46, alerta: "Oeste MT", icone: "fa-cloud-sun" },
+            "Conquista D'Oeste": { dre: "DRE Pontes e Lacerda", temp: 36, sensacao: 38, umidade: 38, alerta: "Quente", icone: "fa-sun" },
+            "Figueirópolis D'Oeste": { dre: "DRE Pontes e Lacerda", temp: 36, sensacao: 38, umidade: 37, alerta: "Quente", icone: "fa-sun" },
+            "Jauru": { dre: "DRE Pontes e Lacerda", temp: 36, sensacao: 38, umidade: 37, alerta: "Quente", icone: "fa-sun" },
+            "Nova Lacerda": { dre: "DRE Pontes e Lacerda", temp: 36, sensacao: 38, umidade: 38, alerta: "Quente", icone: "fa-sun" },
+            "Pontes e Lacerda": { dre: "DRE Pontes e Lacerda", temp: 37, sensacao: 39, umidade: 35, alerta: "Calor Intenso / Vale do Guaporé", icone: "fa-sun" },
+            "Rondolândia": { dre: "DRE Pontes e Lacerda", temp: 33, sensacao: 35, umidade: 55, alerta: "Extremo Oeste / Úmido", icone: "fa-cloud-sun" },
+            "Vale de São Domingos": { dre: "DRE Pontes e Lacerda", temp: 36, sensacao: 38, umidade: 37, alerta: "Quente", icone: "fa-sun" },
+            "Vila Bela da Santíssima Trindade": { dre: "DRE Pontes e Lacerda", temp: 37, sensacao: 39, umidade: 36, alerta: "Histórica / Calor", icone: "fa-sun" },
+
+            // DRE Primavera do Leste (6 municípios)
+            "Campo Verde": { dre: "DRE Primavera do Leste", temp: 33, sensacao: 35, umidade: 42, alerta: "Planalto / Ameno", icone: "fa-cloud-sun" },
+            "Gaúcha do Norte": { dre: "DRE Primavera do Leste", temp: 36, sensacao: 38, umidade: 38, alerta: "Quente", icone: "fa-sun" },
+            "Paranatinga": { dre: "DRE Primavera do Leste", temp: 36, sensacao: 38, umidade: 37, alerta: "Quente", icone: "fa-sun" },
+            "Poxoréu": { dre: "DRE Primavera do Leste", temp: 36, sensacao: 38, umidade: 36, alerta: "Quente", icone: "fa-sun" },
+            "Primavera do Leste": { dre: "DRE Primavera do Leste", temp: 35, sensacao: 37, umidade: 38, alerta: "Atenção Baixa Umidade", icone: "fa-sun" },
+            "Santo Antônio do Leste": { dre: "DRE Primavera do Leste", temp: 35, sensacao: 37, umidade: 39, alerta: "Moderado", icone: "fa-cloud-sun" },
+
+            // DRE Rondonópolis (14 municípios)
+            "Alto Araguaia": { dre: "DRE Rondonópolis", temp: 34, sensacao: 36, umidade: 38, alerta: "Sul MT / Divisa", icone: "fa-cloud-sun" },
+            "Alto Garças": { dre: "DRE Rondonópolis", temp: 33, sensacao: 35, umidade: 40, alerta: "Planalto Sul", icone: "fa-cloud-sun" },
+            "Alto Taquari": { dre: "DRE Rondonópolis", temp: 33, sensacao: 35, umidade: 41, alerta: "Ameno", icone: "fa-cloud-sun" },
+            "Araguainha": { dre: "DRE Rondonópolis", temp: 36, sensacao: 38, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Dom Aquino": { dre: "DRE Rondonópolis", temp: 37, sensacao: 39, umidade: 33, alerta: "Quente", icone: "fa-sun" },
+            "Guiratinga": { dre: "DRE Rondonópolis", temp: 36, sensacao: 38, umidade: 34, alerta: "Quente", icone: "fa-sun" },
+            "Itiquira": { dre: "DRE Rondonópolis", temp: 38, sensacao: 41, umidade: 30, alerta: "Pantanal Sul / Calor", icone: "fa-sun" },
+            "Jaciara": { dre: "DRE Rondonópolis", temp: 36, sensacao: 38, umidade: 35, alerta: "Vale do São Lourenço", icone: "fa-sun" },
+            "Juscimeira": { dre: "DRE Rondonópolis", temp: 37, sensacao: 39, umidade: 33, alerta: "Quente / Águas Termais", icone: "fa-sun" },
+            "Pedra Preta": { dre: "DRE Rondonópolis", temp: 38, sensacao: 40, umidade: 31, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Rondonópolis": { dre: "DRE Rondonópolis", temp: 41, sensacao: 44, umidade: 25, alerta: "Alerta Vermelho / Calor", icone: "fa-fire" },
+            "São José do Povo": { dre: "DRE Rondonópolis", temp: 38, sensacao: 40, umidade: 30, alerta: "Calor Intenso", icone: "fa-sun" },
+            "São Pedro da Cipa": { dre: "DRE Rondonópolis", temp: 36, sensacao: 38, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Tesouro": { dre: "DRE Rondonópolis", temp: 36, sensacao: 38, umidade: 34, alerta: "Quente", icone: "fa-sun" },
+
+            // DRE Sinop (16 municípios)
+            "Cláudia": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 42, alerta: "Norte MT", icone: "fa-cloud-sun" },
+            "Colíder": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 44, alerta: "Norte MT", icone: "fa-cloud-sun" },
+            "Feliz Natal": { dre: "DRE Sinop", temp: 35, sensacao: 37, umidade: 45, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Ipiranga do Norte": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 41, alerta: "Agronegócio / Quente", icone: "fa-sun" },
+            "Itaúba": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 43, alerta: "Norte MT", icone: "fa-cloud-sun" },
+            "Itanhangá": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 42, alerta: "Quente", icone: "fa-sun" },
+            "Lucas do Rio Verde": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 40, alerta: "Moderado / Quente", icone: "fa-cloud-sun" },
+            "Nova Santa Helena": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 43, alerta: "Norte MT", icone: "fa-cloud-sun" },
+            "Nova Ubiratã": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 41, alerta: "Quente", icone: "fa-sun" },
+            "Santa Carmem": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 42, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Sinop": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 42, alerta: "Capital do Nortão", icone: "fa-cloud-sun" },
+            "Sorriso": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 41, alerta: "Capital do Agronegócio", icone: "fa-cloud-sun" },
+            "Tapurah": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 41, alerta: "Quente", icone: "fa-sun" },
+            "União do Sul": { dre: "DRE Sinop", temp: 35, sensacao: 37, umidade: 45, alerta: "Moderado", icone: "fa-cloud-sun" },
+            "Tabaporã": { dre: "DRE Sinop", temp: 35, sensacao: 37, umidade: 46, alerta: "Vale do Arinos / Norte", icone: "fa-cloud-sun" },
+            "Vera": { dre: "DRE Sinop", temp: 36, sensacao: 38, umidade: 42, alerta: "Moderado", icone: "fa-cloud-sun" },
+
+            // DRE Tangará da Serra (7 municípios)
+            "Barra do Bugres": { dre: "DRE Tangará da Serra", temp: 38, sensacao: 40, umidade: 33, alerta: "Calor Intenso / Médio Norte", icone: "fa-sun" },
+            "Campo Novo do Parecis": { dre: "DRE Tangará da Serra", temp: 33, sensacao: 35, umidade: 45, alerta: "Chapada dos Parecis / Ameno", icone: "fa-cloud-sun" },
+            "Denise": { dre: "DRE Tangará da Serra", temp: 37, sensacao: 39, umidade: 34, alerta: "Quente", icone: "fa-sun" },
+            "Nova Olímpia": { dre: "DRE Tangará da Serra", temp: 38, sensacao: 40, umidade: 32, alerta: "Calor Intenso", icone: "fa-sun" },
+            "Porto Estrela": { dre: "DRE Tangará da Serra", temp: 37, sensacao: 39, umidade: 35, alerta: "Quente", icone: "fa-sun" },
+            "Sapezal": { dre: "DRE Tangará da Serra", temp: 33, sensacao: 35, umidade: 46, alerta: "Ameno / Parecis", icone: "fa-cloud-sun" },
+            "Tangará da Serra": { dre: "DRE Tangará da Serra", temp: 34, sensacao: 36, umidade: 45, alerta: "Clima Ameno / Serra", icone: "fa-cloud-sun" }
+        };
+
+        // Base de Dados de Exercícios e Pausas Ativas Ergonômicas
+        const atividadesPausa = [
+            { titulo: "Alongamento de Pescoço", desc: "Gire suavemente a cabeça para a direita e esquerda mantendo 15 segundos cada lado.", tempo: "2 min", icon: "fa-spa" },
+            { titulo: "Descanso Ocular 20-20-20", desc: "Olhe para um ponto distante a 6 metros da tela por 20 segundos para lubrificar a visão.", tempo: "1 min", icon: "fa-eye" },
+            { titulo: "Rotação de Ombros e Punhos", desc: "Faça movimentos circulares com os ombros para trás e gire os punhos para aliviar LER/DORT.", tempo: "2 min", icon: "fa-child" },
+            { titulo: "Caminhada até o Bebedouro", desc: "Levante da cadeira, caminhe até a copa ou bebedouro e encha seu copo de água fresca.", tempo: "3 min", icon: "fa-glass-water" },
+            { titulo: "Respiração Diafragmática", desc: "Inale fundo pelo nariz contando até 4 e expire devagar pela boca contando até 6.", tempo: "2 min", icon: "fa-wind" },
+            { titulo: "Extensão de Lombar na Cadeira", desc: "Sentado ereto, apoie as mãos nas costas e incline suavemente o tronco para trás.", tempo: "1.5 min", icon: "fa-person" }
+        ];
+
+        // Estado do Servidor
+        let perfilServidor = {
+            nome: "Servidor(a) SEDUC",
+            setor: "DTI - Tecnologia",
+            peso: 70,
+            cidade: "Cuiabá (Sede SEDUC/MT)",
+            coposTomados: 0,
+            cafesTomados: 0,
+            metaCopos: 10,
+            mlTomados: 0,
+            mlMeta: 2000
+        };
+
+        let isAudioPlaying = false;
+        let ytPlayer = null;
+        let currentVideoId = "jfKfPfyJRdk";
+        let ambientOscillator = null;
+        let ambientNoise = null;
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            const hoje = new Date();
+            document.getElementById('current-date').innerText = hoje.toLocaleDateString('pt-BR');
+
+            carregarPerfilSalvo();
+            atualizarClimaCidade();
+            calcularMetaAgua();
+            atualizarUI();
+            carregarMuralDemo();
+        });
+
+        // Configuração do YouTube Player via IFrame API
+        function onYouTubeIframeAPIReady() {
+            try {
+                ytPlayer = new YT.Player('yt-player-iframe', {
+                    events: {
+                        'onError': onPlayerError,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            } catch(e) {
+                console.log("YouTube API init fallback", e);
+            }
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.PLAYING) {
+                ocultarErroYouTube();
+            }
+        }
+
+        function onPlayerError(event) {
+            console.warn("YouTube Player Error Code:", event.data);
+            if ([2, 5, 100, 101, 150, 153].includes(event.data)) {
+                mostrarErroYouTube();
+            }
+        }
+
+        function mostrarErroYouTube() {
+            const overlay = document.getElementById('yt-error-overlay');
+            const directBtn = document.getElementById('yt-overlay-direct-btn');
+            if (overlay) overlay.classList.remove('hidden');
+            if (overlay) overlay.classList.add('flex');
+            if (directBtn) directBtn.href = `https://www.youtube.com/watch?v=${currentVideoId}`;
+            mostrarToast("⚠️ Vídeo restrito para incorporação. Clique para abrir direto no YouTube ou use Som de Foco!", "info");
+        }
+
+        function ocultarErroYouTube() {
+            const overlay = document.getElementById('yt-error-overlay');
+            if (overlay) {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+            }
+        }
+
+        // Atualização Dinâmica do Clima conforme o Município Selecionado nas DREs
+        function atualizarClimaCidade() {
+            const select = document.getElementById('select-cidade');
+            const cidadeNome = select ? select.value : "Cuiabá (Sede SEDUC/MT)";
+            perfilServidor.cidade = cidadeNome;
+
+            // Busca os dados no mapa oficial
+            const dadosClima = mapaDREs[cidadeNome] || mapaDREs["Cuiabá"] || { dre: "SEDUC-MT", temp: 37, sensacao: 40, umidade: 33, alerta: "Calor Intenso", icone: "fa-sun" };
+
+            document.getElementById('clima-cidade').innerText = `${cidadeNome} (${dadosClima.dre})`;
+            document.getElementById('clima-temp').innerText = `${dadosClima.temp}°`;
+            document.getElementById('clima-sensacao').innerText = `${dadosClima.sensacao}°`;
+            document.getElementById('clima-umidade').innerText = `${dadosClima.umidade}%`;
+            
+            const badgeAlerta = document.getElementById('badge-alerta');
+            if (badgeAlerta) {
+                badgeAlerta.innerText = dadosClima.alerta;
+                if (dadosClima.temp >= 40) {
+                    badgeAlerta.className = "bg-red-900 text-white font-bold px-2 py-0.5 rounded animate-pulse";
+                } else if (dadosClima.temp >= 37) {
+                    badgeAlerta.className = "bg-red-800/80 text-white font-bold px-2 py-0.5 rounded";
+                } else {
+                    badgeAlerta.className = "bg-amber-800/80 text-white font-bold px-2 py-0.5 rounded";
+                }
+            }
+
+            const iconeElem = document.getElementById('clima-icone');
+            if (iconeElem) {
+                iconeElem.innerHTML = `<i class="fa-solid ${dadosClima.icone} animate-pulse"></i>`;
+            }
+
+            calcularMetaAgua();
+        }
+
+        // Cálculo da Meta de Água com Base no Peso, Temperatura Regional e Compensação de Café
+        function calcularMetaAgua() {
+            const peso = parseFloat(perfilServidor.peso) || 70;
+            const cidadeSelect = perfilServidor.cidade || "Cuiabá";
+            const dados = mapaDREs[cidadeSelect] || { temp: 37 };
+            const temp = dados.temp;
+
+            // Base de 35ml/kg
+            let baseMl = peso * 35;
+
+            // Adicional por temperatura regional no Estado
+            if (temp >= 40) baseMl += 900;
+            else if (temp >= 38) baseMl += 700;
+            else if (temp >= 35) baseMl += 500;
+            else if (temp >= 32) baseMl += 300;
+
+            // Compensação de café (+150ml por xícara)
+            const extraCafe = (perfilServidor.cafesTomados || 0) * 150;
+
+            perfilServidor.mlMeta = Math.round(baseMl + extraCafe);
+            perfilServidor.metaCopos = Math.ceil(perfilServidor.mlMeta / 200);
+
+            document.getElementById('ml-meta').innerText = `${perfilServidor.mlMeta} ml`;
+            document.getElementById('copos-meta').innerText = perfilServidor.metaCopos;
+            
+            if (document.getElementById('qtd-cafe')) {
+                document.getElementById('qtd-cafe').innerText = perfilServidor.cafesTomados || 0;
+                document.getElementById('ml-extra-cafe').innerText = extraCafe;
+            }
+
+            atualizarUI();
+        }
+
+        // Adicionar Café com Compensação
+        function adicionarCafe() {
+            perfilServidor.cafesTomados = (perfilServidor.cafesTomados || 0) + 1;
+            calcularMetaAgua();
+            salvarLocalStorage();
+            mostrarToast("☕ Café registrado! Aumentamos +150ml de água na sua meta diária para compensação.", "info");
+        }
+
+        // Salvar Perfil do Formulário
+        function salvarPerfil(e) {
+            e.preventDefault();
+            perfilServidor.nome = document.getElementById('input-nome').value.trim();
+            perfilServidor.setor = document.getElementById('input-setor').value;
+            perfilServidor.peso = parseFloat(document.getElementById('input-peso').value);
+
+            calcularMetaAgua();
+            salvarLocalStorage();
+            mostrarToast("Perfil atualizado com sucesso! Sua meta foi recalculada.", "sucesso");
+            
+            // Adicionar registro no mural
+            const dadosMun = mapaDREs[perfilServidor.cidade] || { dre: "SEDUC-MT" };
+            adicionarAoMural(perfilServidor.nome, perfilServidor.setor, `${perfilServidor.cidade} (${dadosMun.dre})`, perfilServidor.coposTomados, perfilServidor.metaCopos);
+        }
+
+        // Adicionar Água (+1 copo ou +1 garrafa)
+        function adicionarCopo(qtdCopos) {
+            perfilServidor.coposTomados += qtdCopos;
+            perfilServidor.mlTomados = perfilServidor.coposTomados * 200;
+
+            tocarEfeitoSomHidratado();
+            atualizarUI();
+            verificarConquistas();
+            salvarLocalStorage();
+            
+            mostrarToast(`Parabéns! +${Math.round(qtdCopos * 200)}ml registrados. Continue assim!`, "agua");
+        }
+
+        function adicionarGarrafa() {
+            adicionarCopo(2.5); // 500ml = 2.5 copos de 200ml
+        }
+
+        function removerCopo() {
+            if (perfilServidor.coposTomados > 0) {
+                perfilServidor.coposTomados = Math.max(0, perfilServidor.coposTomados - 1);
+                perfilServidor.mlTomados = perfilServidor.coposTomados * 200;
+                atualizarUI();
+                salvarLocalStorage();
+            }
+        }
+
+        function resetarContador() {
+            perfilServidor.coposTomados = 0;
+            perfilServidor.cafesTomados = 0;
+            perfilServidor.mlTomados = 0;
+            calcularMetaAgua();
+            salvarLocalStorage();
+            mostrarToast("Contador reiniciado para o novo dia.", "info");
+        }
+
+        // Atualização da Interface Visual
+        function atualizarUI() {
+            document.getElementById('copos-tomados').innerText = Math.floor(perfilServidor.coposTomados);
+            document.getElementById('ml-tomados').innerText = `${Math.round(perfilServidor.mlTomados)} ml`;
+            
+            // Atualizar % do garrafão de água
+            const porcentagem = Math.min(100, Math.round((perfilServidor.mlTomados / perfilServidor.mlMeta) * 100));
+            document.getElementById('percent-text').innerText = `${porcentagem}%`;
+            document.getElementById('water-fill').style.height = `${porcentagem}%`;
+
+            // Badge do servidor
+            if (perfilServidor.nome && perfilServidor.nome !== "Servidor(a) SEDUC") {
+                document.getElementById('servidor-badge-nome').innerText = perfilServidor.nome.split(" ")[0];
+            }
+        }
+
+        // Verificar Conquistas/Badges
+        function verificarConquistas() {
+            const b1 = document.getElementById('badge-1');
+            const b2 = document.getElementById('badge-2');
+            const b3 = document.getElementById('badge-3');
+
+            if (perfilServidor.coposTomados >= 1) {
+                b1.classList.remove('opacity-40', 'bg-gray-50');
+                b1.classList.add('bg-green-100', 'border-green-300', 'scale-105');
+            }
+
+            const tempCidade = mapaDREs[perfilServidor.cidade]?.temp || 35;
+            if (perfilServidor.coposTomados >= 5 && tempCidade >= 35) {
+                b2.classList.remove('opacity-40', 'bg-gray-50');
+                b2.classList.add('bg-orange-100', 'border-orange-300', 'scale-105');
+            }
+
+            if (perfilServidor.mlTomados >= perfilServidor.mlMeta) {
+                b3.classList.remove('opacity-40', 'bg-gray-50');
+                b3.classList.add('bg-amber-100', 'border-amber-300', 'scale-105');
+                mostrarToast("🏆 META DIÁRIA DE ÁGUA ALCANÇADA! Você é um Servidor Exemplo na SEDUC!", "sucesso");
+            }
+        }
+
+        // Sortear Pausa Ativa
+        function sortearAtividade() {
+            const item = atividadesPausa[Math.floor(Math.random() * atividadesPausa.length)];
+            
+            document.getElementById('atividade-titulo').innerText = item.titulo;
+            document.getElementById('atividade-desc').innerText = item.desc;
+            document.getElementById('atividade-tempo').innerText = `Duração: ${item.tempo}`;
+            document.getElementById('atividade-icon').className = `fa-solid ${item.icon}`;
+
+            mostrarToast(`Nova pausa selecionada: ${item.titulo}`, "info");
+        }
+
+        // Carregar Música no YouTube
+        function carregarMusicaYouTube(videoId, titulo) {
+            currentVideoId = videoId;
+            ocultarErroYouTube();
+            
+            const iframe = document.getElementById('yt-player-iframe');
+            const titleElem = document.getElementById('yt-current-title');
+            const linkElem = document.getElementById('yt-external-link');
+
+            if (iframe) {
+                iframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1&rel=0&modestbranding=1`;
+            }
+
+            if (titleElem) {
+                titleElem.innerText = titulo;
+            }
+
+            if (linkElem) {
+                linkElem.href = `https://www.youtube.com/watch?v=${videoId}`;
+            }
+
+            pararSomAmbiente();
+            mostrarToast(`▶️ Tocando: ${titulo.substring(0, 30)}...`, "musica");
+        }
+
+        function extrairVideoId(url) {
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : (url.length === 11 ? url : null);
+        }
+
+        function carregarUrlPersonalizada() {
+            const input = document.getElementById('input-yt-url');
+            const val = input.value.trim();
+            if (!val) {
+                mostrarToast("Cole um link ou ID do YouTube primeiro!", "info");
+                return;
+            }
+
+            const videoId = extrairVideoId(val);
+            if (videoId) {
+                carregarMusicaYouTube(videoId, "Vídeo do YouTube do Servidor");
+                input.value = "";
+            } else {
+                mostrarToast("URL do YouTube não reconhecida. Verifique o link.", "info");
+            }
+        }
+
+        function copiarLinkMusica() {
+            const url = `https://www.youtube.com/watch?v=${currentVideoId}`;
+            const tempInput = document.createElement('input');
+            tempInput.value = url;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+            mostrarToast("Link do YouTube copiado para a área de transferência! 🔗", "sucesso");
+        }
+
+        // Alternar abas de áudio no painel
+        function alternarAbaAudio(aba) {
+            const tabYt = document.getElementById('tab-yt');
+            const tabAmbient = document.getElementById('tab-ambient');
+            const panelYt = document.getElementById('panel-yt-list');
+            const panelAmbient = document.getElementById('panel-ambient-list');
+
+            if (aba === 'yt') {
+                tabYt.className = "py-1.5 px-3 border-b-2 border-red-600 text-red-600 font-bold flex items-center gap-1.5";
+                tabAmbient.className = "py-1.5 px-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-1.5";
+                panelYt.classList.remove('hidden');
+                panelAmbient.classList.add('hidden');
+            } else {
+                tabAmbient.className = "py-1.5 px-3 border-b-2 border-blue-600 text-blue-600 font-bold flex items-center gap-1.5";
+                tabYt.className = "py-1.5 px-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 flex items-center gap-1.5";
+                panelAmbient.classList.remove('hidden');
+                panelYt.classList.add('hidden');
+            }
+        }
+
+        function alternarGeradorAmbiental() {
+            ocultarErroYouTube();
+            alternarAbaAudio('ambient');
+            tocarSomAmbiente('chuva');
+        }
+
+        // Sintetizador Interno Web Audio
+        function tocarSomAmbiente(tipo) {
+            pararSomAmbiente();
+            try {
+                if (window.Tone) {
+                    Tone.start();
+                    if (tipo === 'chuva' || tipo === 'ondas') {
+                        ambientNoise = new Tone.Noise("pink").start();
+                        const filter = new Tone.Filter(tipo === 'chuva' ? 800 : 400, "lowpass").toDestination();
+                        ambientNoise.connect(filter);
+                        ambientNoise.volume.value = -18;
+                    } else if (tipo === 'lofi') {
+                        ambientOscillator = new Tone.Oscillator(432, "sine").toDestination().start();
+                        ambientOscillator.volume.value = -22;
+                    }
+                    
+                    document.getElementById('yt-current-title').innerText = `🔊 Som Ambiental: ${tipo.toUpperCase()}`;
+                    document.getElementById('yt-status-tag').innerText = "Som Interno";
+                    document.getElementById('yt-status-tag').className = "bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+                    mostrarToast(`🔊 Executando áudio de foco ambiental: ${tipo}`, "musica");
+                }
+            } catch(e) {
+                console.log("Web Audio error", e);
+            }
+        }
+
+        function pararSomAmbiente() {
+            if (ambientNoise) {
+                ambientNoise.stop();
+                ambientNoise.dispose();
+                ambientNoise = null;
+            }
+            if (ambientOscillator) {
+                ambientOscillator.stop();
+                ambientOscillator.dispose();
+                ambientOscillator = null;
+            }
+            document.getElementById('yt-status-tag').innerText = "YouTube Player";
+            document.getElementById('yt-status-tag').className = "bg-red-100 text-red-700 text-[10px] font-bold px-2 py-0.5 rounded-full";
+        }
+
+        function tocarEfeitoSomHidratado() {
+            try {
+                if (window.Tone) {
+                    const soundEffect = new Tone.Synth().toDestination();
+                    soundEffect.volume.value = -12;
+                    soundEffect.triggerAttackRelease("C5", "16n");
+                }
+            } catch(e){}
+        }
+
+        function toggleAudio() {
+            const btnText = document.getElementById('audio-text');
+            if (!isAudioPlaying) {
+                carregarMusicaYouTube('wR__3bqwsRQ', 'MPB Voz e Violão & Bossa Nova Instrumental');
+                btnText.innerText = "Tocando no YouTube";
+                isAudioPlaying = true;
+            } else {
+                const iframe = document.getElementById('yt-player-iframe');
+                if (iframe) iframe.src = "about:blank";
+                pararSomAmbiente();
+                btnText.innerText = "Músicas do YouTube";
+                isAudioPlaying = false;
+            }
+        }
+
+        // Mural de Servidores representativo de várias DREs
+        function carregarMuralDemo() {
+            const listaDemo = [
+                { nome: "Carlos Eduardo Silva", setor: "DTI - Tecnologia", cidade: "Cuiabá (Órgão Central)", copos: 12, meta: 12, cafe: 2 },
+                { nome: "Profª. Ana Paula Ramos", setor: "DRE / Unidade Escolar", cidade: "Alta Floresta (DRE Alta Floresta)", copos: 10, meta: 10, cafe: 1 },
+                { nome: "Roberto Mendes", setor: "SAG - Gestão", cidade: "Barra do Garças (DRE Barra do Garças)", copos: 7, meta: 11, cafe: 3 },
+                { nome: "Juliana Lima Costa", setor: "Gabinete SEDUC", cidade: "Sinop (DRE Sinop)", copos: 11, meta: 11, cafe: 0 },
+                { nome: "Marcos Vinícius", setor: "SAOC - Orçamento", cidade: "Cáceres (DRE Cáceres)", copos: 6, meta: 10, cafe: 4 },
+                { nome: "Prof. Patrícia Alencar", setor: "SAGE - Ensino", cidade: "Tangará da Serra (DRE Tangará)", copos: 9, meta: 9, cafe: 1 },
+                { nome: "Antônio Ferreira", setor: "DRE / Unidade Escolar", cidade: "Confresa (DRE Confresa)", copos: 10, meta: 10, cafe: 2 },
+                { nome: "Luciana Xavier", setor: "DRE / Unidade Escolar", cidade: "Matupá (DRE Matupá)", copos: 12, meta: 12, cafe: 1 },
+                { nome: "Sérgio Henrique", setor: "SAG - Gestão", cidade: "Juína (DRE Juína)", copos: 5, meta: 9, cafe: 3 },
+                { nome: "Fernanda Souza", setor: "SAOC - Orçamento", cidade: "Primavera do Leste (DRE Primavera)", copos: 10, meta: 10, cafe: 2 }
+            ];
+
+            const tbody = document.getElementById('mural-lista');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            listaDemo.forEach(s => {
+                adicionarLinhaMural(s.nome, s.setor, s.cidade, s.copos, s.meta, false, s.cafe || 0);
+            });
+        }
+
+        function adicionarAoMural(nome, setor, cidade, copos, meta) {
+            adicionarLinhaMural(nome, setor, cidade, copos, meta, true, perfilServidor.cafesTomados || 0);
+        }
+
+        function adicionarLinhaMural(nome, setor, cidade, copos, meta, topo = false, cafe = 0) {
+            const tbody = document.getElementById('mural-lista');
+            if (!tbody) return;
+            const percent = Math.min(100, Math.round((copos / meta) * 100));
+            
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-blue-50/50 transition";
+            tr.innerHTML = `
+                <td class="py-2.5 px-4 font-semibold text-gray-800 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-seduc-blue text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                        ${nome.charAt(0)}
+                    </div>
+                    <div>
+                        <span class="block leading-tight font-semibold text-gray-800">${nome}</span>
+                        ${cafe > 0 ? `<span class="text-[10px] text-amber-700 font-normal"><i class="fa-solid fa-mug-hot text-amber-600"></i> ${cafe} café(s)</span>` : ''}
+                    </div>
+                </td>
+                <td class="py-2.5 px-4">${setor}</td>
+                <td class="py-2.5 px-4"><span class="bg-blue-50 text-seduc-blue border border-blue-100 px-2 py-0.5 rounded-md text-[10px] font-medium">${cidade}</span></td>
+                <td class="py-2.5 px-4 text-center font-bold text-seduc-lightBlue">${Math.floor(copos)} / ${meta}</td>
+                <td class="py-2.5 px-4 text-center">
+                    <div class="w-full bg-gray-200 rounded-full h-2 max-w-[90px] mx-auto overflow-hidden">
+                        <div class="bg-seduc-lightBlue h-2 rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                    </div>
+                    <span class="text-[10px] text-gray-400 font-semibold">${percent}%</span>
+                </td>
+                <td class="py-2.5 px-4 text-right">
+                    ${percent >= 100 
+                        ? '<span class="bg-green-100 text-green-800 border border-green-200 text-[10px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-circle-check"></i> Meta Atingida!</span>'
+                        : '<span class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-medium px-2.5 py-1 rounded-full inline-flex items-center gap-1"><i class="fa-solid fa-hourglass-half"></i> Em progresso</span>'
+                    }
+                </td>
+            `;
+
+            if (topo && tbody.firstChild) {
+                tbody.insertBefore(tr, tbody.firstChild);
+            } else {
+                tbody.appendChild(tr);
+            }
+        }
+
+        function limparMural() {
+            document.getElementById('mural-lista').innerHTML = "";
+            mostrarToast("Mural zerado.", "info");
+        }
+
+        // Sistema de Notificação Toast
+        function mostrarToast(msg, tipo = "info") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bg = "bg-gray-900 text-white";
+            let icon = "fa-info-circle";
+
+            if (tipo === "sucesso") { bg = "bg-green-600 text-white"; icon = "fa-circle-check"; }
+            else if (tipo === "agua") { bg = "bg-seduc-lightBlue text-white"; icon = "fa-droplet"; }
+            else if (tipo === "musica") { bg = "bg-purple-700 text-white"; icon = "fa-music"; }
+
+            toast.className = `${bg} px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-xs font-medium pointer-events-auto transform transition duration-300 translate-y-2 opacity-0 max-w-sm`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-base shrink-0"></i> <span>${msg}</span>`;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Local Storage
+        function salvarLocalStorage() {
+            localStorage.setItem('seduc_hidra_perfil', JSON.stringify(perfilServidor));
+        }
+
+        function carregarPerfilSalvo() {
+            const salvo = localStorage.getItem('seduc_hidra_perfil');
+            if (salvo) {
+                try {
+                    perfilServidor = { ...perfilServidor, ...JSON.parse(salvo) };
+                    document.getElementById('input-nome').value = perfilServidor.nome || '';
+                    document.getElementById('input-setor').value = perfilServidor.setor || 'DTI - Tecnologia';
+                    document.getElementById('input-peso').value = perfilServidor.peso || 70;
+                    document.getElementById('select-cidade').value = perfilServidor.cidade || 'Cuiabá (Sede SEDUC/MT)';
+                } catch(e){}
+            }
+        }
+    </script>
+</body>
+</html>
